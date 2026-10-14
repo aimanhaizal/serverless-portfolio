@@ -187,3 +187,43 @@ h3 { line-height: 1.35; }
     transition-duration: .01ms !important;
   }
 }
+
+/* Dynamic GitHub repositories */
+.repo-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.repo-card {
+  min-width: 0;
+}
+
+.repo-card h3 {
+  overflow-wrap: anywhere;
+}
+
+.repo-description {
+  min-height: 4.5rem;
+  overflow-wrap: anywhere;
+}
+
+.repo-status {
+  color: var(--muted);
+  font: .78rem/1.7 var(--mono);
+  margin: 0 0 1.2rem;
+}
+
+.repo-profile-link {
+  margin-top: 1rem;
+}
+
+@media (max-width: 760px) {
+  .repo-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .repo-description {
+    min-height: auto;
+  }
+}
