@@ -227,3 +227,14 @@ h3 { line-height: 1.35; }
     min-height: auto;
   }
 }
+
+.tags .language-tag {
+  color: var(--cyan);
+  border-color: rgba(112, 214, 232, 0.35);
+}
+
+.tags .topic-tag {
+  color: var(--green);
+  border-color: rgba(126, 231, 135, 0.3);
+  background: rgba(126, 231, 135, 0.05);
+}

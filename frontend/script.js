@@ -93,15 +93,24 @@ async function loadRepositories() {
 
       const tags = document.createElement("div");
       tags.className = "tags";
-
+      
       if (repo.language) {
         const language = document.createElement("span");
+        language.className = "language-tag";
         language.textContent = repo.language;
         tags.append(language);
       }
-
+      
+      (repo.topics || []).slice(0, 4).forEach((topic) => {
+        const tag = document.createElement("span");
+        tag.className = "topic-tag";
+        tag.textContent = topic;
+        tags.append(tag);
+      });
+      
       const updated = document.createElement("span");
-      updated.textContent = `Updated ${new Date(repo.updated_at).toLocaleDateString()}`;
+      updated.textContent =
+        `Updated ${new Date(repo.updated_at).toLocaleDateString()}`;
       tags.append(updated);
 
       const link = document.createElement("a");
