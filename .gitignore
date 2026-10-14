@@ -242,3 +242,15 @@ dist/
 # Editors and operating system files
 .vscode/
 .DS_Store
+
+# AWS CDK generated output
+cdk.out/
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Node.js
+node_modules/
