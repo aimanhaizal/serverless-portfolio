@@ -3,10 +3,11 @@ from pathlib import Path
 from aws_cdk import (
     CfnOutput,
     Duration,
+    RemovalPolicy,
     Stack,
+    aws_dynamodb as dynamodb,
     aws_lambda as lambda_,
 )
-from aws_cdk import aws_lambda as lambda_service
 from constructs import Construct
 
 
@@ -21,7 +22,18 @@ class PortfolioStack(Stack):
 
         backend_path = Path(__file__).resolve().parent.parent / "backend"
 
-        api_function = lambda_service.Function(
+        visitor_table = dynamodb.Table(
+            self,
+            "VisitorCounterTable",
+            partition_key=dynamodb.Attribute(
+                name="counter_id",
+                type=dynamodb.AttributeType.STRING,
+            ),
+            billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
+            removal_policy=RemovalPolicy.RETAIN,
+        )
+
+        api_function = lambda_.Function(
             self,
             "PortfolioApiFunction",
             runtime=lambda_.Runtime.PYTHON_3_10,
@@ -30,7 +42,12 @@ class PortfolioStack(Stack):
             description="Serverless portfolio HTTP handler",
             memory_size=128,
             timeout=Duration.seconds(5),
+            environment={
+                "VISITOR_TABLE_NAME": visitor_table.table_name,
+            },
         )
+
+        visitor_table.grant_read_write_data(api_function)
 
         function_url = api_function.add_function_url(
             auth_type=lambda_.FunctionUrlAuthType.NONE,

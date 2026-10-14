@@ -1,4 +1,8 @@
 import json
+import os
+
+import boto3
+from botocore.exceptions import BotoCoreError, ClientError
 
 
 def response(status_code: int, body: dict) -> dict:
@@ -21,10 +25,33 @@ def handler(event, context=None):
     method = http_context.get("method", "GET").upper()
     path = event.get("rawPath", "/")
 
-    if path != "/health":
+    if path not in ("/health", "/visitors"):
         return response(404, {"error": "Not found"})
 
     if method != "GET":
         return response(405, {"error": "Method not allowed"})
 
-    return response(200, {"status": "ok"})
+    if path == "/health":
+        return response(200, {"status": "ok"})
+
+    table_name = os.environ.get("VISITOR_TABLE_NAME")
+    if not table_name:
+        return response(500, {"error": "Visitor counter is not configured"})
+
+    try:
+        dynamodb = boto3.resource("dynamodb")
+        table = dynamodb.Table(table_name)
+
+        result = table.update_item(
+            Key={"counter_id": "portfolio"},
+            UpdateExpression="ADD visit_count :increment",
+            ExpressionAttributeValues={":increment": 1},
+            ReturnValues="UPDATED_NEW",
+        )
+
+        return response(
+            200,
+            {"visitors": int(result["Attributes"]["visit_count"])},
+        )
+    except (BotoCoreError, ClientError):
+        return response(500, {"error": "Unable to update visitor counter"})
