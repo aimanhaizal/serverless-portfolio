@@ -218,3 +218,27 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+############
+# Python environments
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# AWS credentials and local configuration
+.aws/
+cdk.context.json
+
+# Node.js
+node_modules/
+dist/
+
+# Editors and operating system files
+.vscode/
+.DS_Store
