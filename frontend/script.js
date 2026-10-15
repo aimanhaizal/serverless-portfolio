@@ -142,6 +142,7 @@ function updateAwsStatus(state, message) {
   const title = document.querySelector("#aws-status-title");
   const note = document.querySelector("#aws-status-note");
   const counterLabel = document.querySelector(".aws-counter-label");
+  const statusDot = counterLabel?.querySelector(".status-dot");
 
   const states = {
     checking: {
@@ -168,6 +169,14 @@ function updateAwsStatus(state, message) {
   if (title) title.textContent = current.title;
   if (note) note.textContent = message;
   if (counterLabel) counterLabel.lastChild.textContent = ` ${current.counter}`;
+
+  if (statusDot) {
+    statusDot.style.backgroundColor =
+      state === "connected" ? "var(--green)" :
+      state === "unavailable" ? "#ef4444" :
+      "var(--muted)";
+    statusDot.style.boxShadow = "none";
+  }
 }
 
 async function loadVisitorCount() {
@@ -177,7 +186,7 @@ async function loadVisitorCount() {
   const apiUrl =
     "https://vwrhwdy26e.execute-api.ap-southeast-1.amazonaws.com";
 
-  updateAwsStatus("checking", "Waiting for a response from the AWS API.");
+  updateAwsStatus("checking", "Checking the live AWS API.");
 
   try {
     const response = await fetch(`${apiUrl}/visitors`, {
@@ -191,27 +200,69 @@ async function loadVisitorCount() {
 
     const data = await response.json();
 
-    if (typeof data.visitors !== "number" ||
-        !Number.isFinite(data.visitors) ||
-        data.visitors < 0) {
+    if (
+      typeof data.visitors !== "number" ||
+      !Number.isFinite(data.visitors) ||
+      data.visitors < 0
+    ) {
       throw new Error("Unexpected visitor count response");
     }
 
     counter.textContent = data.visitors.toLocaleString();
-
     updateAwsStatus(
       "connected",
-      "The AWS API responded successfully and returned a valid visitor count. The counter is live."
+      "Live count received from the AWS API."
     );
   } catch (error) {
-    console.error("Unable to load visitor count:", error);
+    console.warn("AWS API unavailable; loading saved snapshot.", error);
 
-    counter.textContent = "Unavailable";
+    try {
+      const response = await fetch("./visitor-count.json", {
+        cache: "no-store",
+      });
 
-    updateAwsStatus(
-      "unavailable",
-      "The API request failed or did not return valid data. No saved-count fallback is configured yet."
-    );
+      if (!response.ok) {
+        throw new Error(`Snapshot returned HTTP ${response.status}`);
+      }
+
+      const snapshot = await response.json();
+
+      if (
+        typeof snapshot.visitors !== "number" ||
+        !Number.isFinite(snapshot.visitors) ||
+        snapshot.visitors < 0
+      ) {
+        throw new Error("Invalid visitor snapshot");
+      }
+
+      counter.textContent = snapshot.visitors.toLocaleString();
+
+      const isPlaceholder = snapshot.source === "initial-placeholder";
+      const timestamp = snapshot.updatedAt
+        ? ` Last updated: ${snapshot.updatedAt}.`
+        : "";
+
+      updateAwsStatus(
+        "unavailable",
+        isPlaceholder
+          ? "AWS is unavailable. This is an initial placeholder, not a verified historical count."
+          : `AWS is unavailable. Showing the last recorded count.${timestamp}`
+      );
+
+      const caption = document.querySelector(".aws-counter-caption");
+      if (caption) {
+        caption.textContent = isPlaceholder
+          ? "Initial placeholder · Not a recorded count"
+          : "Last recorded visitor counter hits";
+      }
+    } catch (snapshotError) {
+      console.error("Unable to load visitor snapshot:", snapshotError);
+      counter.textContent = "Unavailable";
+      updateAwsStatus(
+        "unavailable",
+        "AWS is unavailable and no valid snapshot could be loaded."
+      );
+    }
   }
 }
 

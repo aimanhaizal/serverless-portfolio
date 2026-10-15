@@ -121,3 +121,60 @@ def test_visitors_endpoint_handles_dynamodb_error(monkeypatch):
     assert json.loads(result["body"]) == {
         "error": "Unable to update visitor counter"
     }
+
+def test_current_visitors_endpoint_reads_without_incrementing(monkeypatch):
+    class FakeTable:
+        def get_item(self, **kwargs):
+            assert kwargs["Key"] == {"counter_id": "portfolio"}
+            assert kwargs["ConsistentRead"] is True
+            return {"Item": {"visit_count": 12}}
+
+        def update_item(self, **kwargs):
+            raise AssertionError("Read-only endpoint must not increment")
+
+    class FakeDynamoDB:
+        def Table(self, table_name):
+            assert table_name == "test-visitor-table"
+            return FakeTable()
+
+    monkeypatch.setenv("VISITOR_TABLE_NAME", "test-visitor-table")
+
+    import boto3
+
+    monkeypatch.setattr(
+        boto3,
+        "resource",
+        lambda service_name: FakeDynamoDB(),
+    )
+
+    result = handler(make_event(path="/visitors/current"))
+
+    assert result["statusCode"] == 200
+    assert json.loads(result["body"]) == {"visitors": 12}
+
+
+def test_current_visitors_endpoint_returns_zero_when_counter_missing(
+    monkeypatch,
+):
+    class FakeTable:
+        def get_item(self, **kwargs):
+            return {}
+
+    class FakeDynamoDB:
+        def Table(self, table_name):
+            return FakeTable()
+
+    monkeypatch.setenv("VISITOR_TABLE_NAME", "test-visitor-table")
+
+    import boto3
+
+    monkeypatch.setattr(
+        boto3,
+        "resource",
+        lambda service_name: FakeDynamoDB(),
+    )
+
+    result = handler(make_event(path="/visitors/current"))
+
+    assert result["statusCode"] == 200
+    assert json.loads(result["body"]) == {"visitors": 0}

@@ -25,7 +25,7 @@ def handler(event, context=None):
     method = http_context.get("method", "GET").upper()
     path = event.get("rawPath", "/")
 
-    if path not in ("/health", "/visitors"):
+    if path not in ("/health", "/visitors", "/visitors/current"):
         return response(404, {"error": "Not found"})
 
     if method != "GET":
@@ -41,6 +41,17 @@ def handler(event, context=None):
     try:
         dynamodb = boto3.resource("dynamodb")
         table = dynamodb.Table(table_name)
+
+        if path == "/visitors/current":
+            result = table.get_item(
+                Key={"counter_id": "portfolio"},
+                ConsistentRead=True,
+            )
+            item = result.get("Item", {})
+            return response(
+                200,
+                {"visitors": int(item.get("visit_count", 0))},
+            )
 
         result = table.update_item(
             Key={"counter_id": "portfolio"},

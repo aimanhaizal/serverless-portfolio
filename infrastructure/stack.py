@@ -87,6 +87,12 @@ class PortfolioStack(Stack):
             integration=lambda_integration,
         )
 
+        http_api.add_routes(
+            path="/visitors/current",
+            methods=[apigatewayv2.HttpMethod.GET],
+            integration=lambda_integration,
+        )
+
         CfnOutput(
             self,
             "PortfolioApiUrl",
