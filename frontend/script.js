@@ -167,3 +167,22 @@ async function loadVisitorCount() {
 }
 
 loadVisitorCount();
+
+function setupAwsStatusToggle() {
+  const button = document.querySelector("#aws-status-toggle");
+  const details = document.querySelector("#aws-status-details");
+  const chevron = document.querySelector("#aws-status-chevron");
+
+  if (!button || !details || !chevron) return;
+
+  button.addEventListener("click", () => {
+    const isExpanded = button.getAttribute("aria-expanded") === "true";
+    const nextExpanded = !isExpanded;
+
+    button.setAttribute("aria-expanded", String(nextExpanded));
+    details.hidden = !nextExpanded;
+    chevron.textContent = nextExpanded ? "−" : "+";
+  });
+}
+
+setupAwsStatusToggle();

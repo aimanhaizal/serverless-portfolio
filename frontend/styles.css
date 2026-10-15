@@ -377,3 +377,77 @@ h3 { line-height: 1.35; }
   color: var(--green);
   font: .78rem/1.7 var(--mono);
 }
+/* Expandable AWS status explanation */
+.aws-status-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .55rem;
+  width: fit-content;
+  max-width: 100%;
+  margin: 1rem auto 0;
+  padding: .6rem .85rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  font: .8rem/1.4 var(--mono);
+  cursor: pointer;
+  transition: border-color .2s ease, color .2s ease, background .2s ease;
+}
+
+.aws-status-toggle:hover,
+.aws-status-toggle:focus-visible {
+  color: var(--text);
+  border-color: var(--green);
+  background: rgba(126, 231, 135, .05);
+}
+
+.aws-status-toggle:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 3px;
+}
+
+#aws-status-chevron {
+  color: var(--green);
+}
+
+.aws-status-details {
+  max-width: 540px;
+  margin: 1rem auto 0;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, .16);
+  color: var(--muted);
+  font-size: .9rem;
+  line-height: 1.7;
+  text-align: left;
+}
+
+.aws-status-details[hidden] {
+  display: none;
+}
+
+.aws-status-details p {
+  margin: 0;
+}
+
+.aws-status-details .aws-status-title {
+  margin-bottom: .4rem;
+  color: var(--text);
+  font-family: var(--mono);
+  font-weight: 600;
+}
+
+.aws-status-details .aws-status-note {
+  margin-top: .75rem;
+  font-size: .78rem;
+  opacity: .8;
+}
+
+@media (max-width: 480px) {
+  .aws-status-toggle {
+    width: 100%;
+  }
+}

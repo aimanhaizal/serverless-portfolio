@@ -200,6 +200,30 @@
           </div>
           <p id="visitor-count" aria-live="polite">Loading...</p>
           <span class="aws-counter-caption">Visitor counter hits</span>
+
+          <button
+            class="aws-status-toggle"
+            id="aws-status-toggle"
+            type="button"
+            aria-expanded="false"
+            aria-controls="aws-status-details"
+          >
+            <span aria-hidden="true">☁</span>
+            <span id="aws-status-button-label">About AWS status</span>
+            <span id="aws-status-chevron" aria-hidden="true">+</span>
+          </button>
+
+          <div class="aws-status-details" id="aws-status-details" hidden>
+            <p class="aws-status-title">How the counter works</p>
+            <p>
+              The counter normally connects to an AWS serverless API.
+              If AWS becomes unavailable, the site can show the last saved
+              count instead. The rest of this portfolio remains available.
+            </p>
+            <p class="aws-status-note">
+              Connection status and saved-count fallback are not yet enabled.
+            </p>
+          </div>
         </div>
 
         <div class="aws-flow-heading">
