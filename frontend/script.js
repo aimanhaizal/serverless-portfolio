@@ -126,7 +126,7 @@ async function loadRepositories() {
 
     grid.replaceChildren(fragment);
     status.textContent =
-      `Showing ${visibleRepositories.length} public repositories, sorted by recent updates.`;
+      `Showing ${visibleRepositories.length} other public repositories, fetched live from GitHub and sorted by recent updates.`;
   } catch (error) {
     console.error("Unable to load GitHub repositories:", error);
     status.textContent =
@@ -135,3 +135,35 @@ async function loadRepositories() {
 }
 
 loadRepositories();
+
+
+async function loadVisitorCount() {
+  const counter = document.querySelector("#visitor-count");
+  if (!counter) return;
+
+  const apiUrl =
+    "https://vwrhwdy26e.execute-api.ap-southeast-1.amazonaws.com";
+
+  try {
+    const response = await fetch(`${apiUrl}/visitors`, {
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      throw new Error(`API returned HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (typeof data.visitors !== "number") {
+      throw new Error("Unexpected visitor count response");
+    }
+
+    counter.textContent = data.visitors.toLocaleString();
+  } catch (error) {
+    console.error("Unable to load visitor count:", error);
+    counter.textContent = "Currently unavailable";
+  }
+}
+
+loadVisitorCount();

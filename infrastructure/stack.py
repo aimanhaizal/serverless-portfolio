@@ -5,6 +5,8 @@ from aws_cdk import (
     Duration,
     RemovalPolicy,
     Stack,
+    aws_apigatewayv2 as apigatewayv2,
+    aws_apigatewayv2_integrations as integrations,
     aws_dynamodb as dynamodb,
     aws_lambda as lambda_,
 )
@@ -36,7 +38,8 @@ class PortfolioStack(Stack):
         api_function = lambda_.Function(
             self,
             "PortfolioApiFunction",
-            runtime=lambda_.Runtime.PYTHON_3_10,
+            # runtime=lambda_.Runtime.PYTHON_3_10,
+            runtime=lambda_.Runtime.PYTHON_3_12,
             handler="app.handler",
             code=lambda_.Code.from_asset(str(backend_path)),
             description="Serverless portfolio HTTP handler",
@@ -47,21 +50,46 @@ class PortfolioStack(Stack):
             },
         )
 
+        # Grant the Lambda access to the visitor counter table.
         visitor_table.grant_read_write_data(api_function)
 
-        function_url = api_function.add_function_url(
-            auth_type=lambda_.FunctionUrlAuthType.NONE,
-            cors=lambda_.FunctionUrlCorsOptions(
-                allowed_origins=["http://localhost:8000"],
-                allowed_methods=[lambda_.HttpMethod.GET],
-                allowed_headers=["content-type"],
+        # Public HTTP API with browser CORS restricted to known origins.
+        http_api = apigatewayv2.HttpApi(
+            self,
+            "PortfolioHttpApi",
+            api_name="serverless-portfolio-api",
+            description="HTTP API for the serverless portfolio",
+            cors_preflight=apigatewayv2.CorsPreflightOptions(
+                allow_origins=[
+                    "https://aimanhaizal.github.io",
+                    "http://localhost:8000",
+                ],
+                allow_methods=[apigatewayv2.CorsHttpMethod.GET],
+                allow_headers=["content-type"],
                 max_age=Duration.minutes(10),
             ),
         )
 
+        lambda_integration = integrations.HttpLambdaIntegration(
+            "PortfolioLambdaIntegration",
+            api_function,
+        )
+
+        http_api.add_routes(
+            path="/health",
+            methods=[apigatewayv2.HttpMethod.GET],
+            integration=lambda_integration,
+        )
+
+        http_api.add_routes(
+            path="/visitors",
+            methods=[apigatewayv2.HttpMethod.GET],
+            integration=lambda_integration,
+        )
+
         CfnOutput(
             self,
-            "PortfolioFunctionUrl",
-            value=function_url.url,
-            description="Public HTTPS endpoint for the portfolio API",
+            "PortfolioApiUrl",
+            value=http_api.api_endpoint,
+            description="Base HTTPS endpoint for the portfolio HTTP API",
         )

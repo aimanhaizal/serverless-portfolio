@@ -238,3 +238,142 @@ h3 { line-height: 1.35; }
   border-color: rgba(126, 231, 135, 0.3);
   background: rgba(126, 231, 135, 0.05);
 }
+
+
+/* AWS visitor counter showcase */
+.aws-intro {
+  max-width: 650px;
+  color: var(--muted);
+  line-height: 1.8;
+  margin-top: 1rem;
+}
+
+.aws-panel {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel);
+  overflow: hidden;
+}
+
+.aws-counter {
+  padding: clamp(1.5rem, 5vw, 3rem);
+  background:
+    radial-gradient(ellipse at 10% 0%, rgba(126, 231, 135, .09), transparent 60%),
+    var(--panel);
+  border-bottom: 1px solid var(--border);
+}
+
+.aws-counter-label {
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+  color: var(--green);
+  font: .75rem/1.5 var(--mono);
+  letter-spacing: .08em;
+}
+
+.aws-counter #visitor-count {
+  margin: .75rem 0 0;
+  color: var(--text);
+  font-size: clamp(3.5rem, 10vw, 6rem);
+  font-weight: 750;
+  line-height: 1.05;
+  letter-spacing: -.06em;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.aws-counter-caption {
+  display: block;
+  margin-top: .75rem;
+  color: var(--muted);
+  font-size: .9rem;
+}
+
+.aws-flow-heading {
+  padding: 1.5rem 1.5rem 0;
+}
+
+.aws-flow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: stretch;
+  gap: 1rem;
+  padding: 1.5rem;
+}
+
+.aws-service {
+  min-width: 0;
+  padding: 1.2rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, .015);
+}
+
+.aws-service-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid rgba(126, 231, 135, .3);
+  border-radius: 6px;
+  color: var(--green);
+  font: 1.15rem var(--mono);
+}
+
+.aws-service h3 {
+  margin: 1rem 0 .5rem;
+  font-size: 1rem;
+}
+
+.aws-service p {
+  margin: 0;
+  color: var(--muted);
+  font-size: .88rem;
+  line-height: 1.7;
+}
+
+.aws-flow-arrow {
+  align-self: center;
+  color: var(--green);
+  font-size: 1.4rem;
+}
+
+.aws-footnote {
+  margin: 0 1.5rem;
+  padding: 1.25rem 0 1.5rem;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: .88rem;
+  line-height: 1.8;
+}
+
+@media (max-width: 680px) {
+  .aws-flow {
+    grid-template-columns: 1fr;
+    gap: .75rem;
+  }
+
+  .aws-flow-arrow {
+    justify-self: center;
+    transform: rotate(90deg);
+  }
+
+  .aws-service {
+    padding: 1rem;
+  }
+
+  .aws-footnote {
+    margin-inline: 1rem;
+  }
+}
+
+/* GitHub API integration note */
+.integration-note {
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+  margin-top: 1rem;
+  color: var(--green);
+  font: .78rem/1.7 var(--mono);
+}
