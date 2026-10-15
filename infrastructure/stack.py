@@ -64,7 +64,10 @@ class PortfolioStack(Stack):
                     "https://aimanhaizal.github.io",
                     "http://localhost:8000",
                 ],
-                allow_methods=[apigatewayv2.CorsHttpMethod.GET],
+                allow_methods=[
+                    apigatewayv2.CorsHttpMethod.GET,
+                    apigatewayv2.CorsHttpMethod.PUT,
+                ],
                 allow_headers=["content-type"],
                 max_age=Duration.minutes(10),
             ),
@@ -90,6 +93,15 @@ class PortfolioStack(Stack):
         http_api.add_routes(
             path="/visitors/current",
             methods=[apigatewayv2.HttpMethod.GET],
+            integration=lambda_integration,
+        )
+
+        http_api.add_routes(
+            path="/canvas",
+            methods=[
+                apigatewayv2.HttpMethod.GET,
+                apigatewayv2.HttpMethod.PUT,
+            ],
             integration=lambda_integration,
         )
 

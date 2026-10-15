@@ -27,6 +27,7 @@
       <a href="#skills">./skills</a>
       <a href="#projects">./projects</a>
       <a href="#repositories">./repos</a>
+      <a href="#pixel-art">./pixel-art</a>
       <a href="#contact">./contact</a>
     </nav>
   </header>
@@ -160,6 +161,10 @@
       </p>
     </section>
 
+    
+    
+
+
     <section class="section contact-section" id="contact">
       <div class="section-heading">
         <p class="eyebrow">04 / CONTACT</p>
@@ -187,8 +192,95 @@
         <p class="eyebrow">REAL CLOUD INFRASTRUCTURE</p>
         <h2>Yes, this portfolio uses AWS.</h2>
         <p class="aws-intro">
-          This number isn't hardcoded. When you request the visitor counter,
-          a real AWS backend processes the request and reads the stored count.
+          This portfolio uses real AWS services to power two interactive features: a shared pixel-art canvas and a live visitor counter. Together, they demonstrate how serverless applications handle requests and store data without managing servers.
+        </p>
+      </div>
+
+      <section class="section" id="pixel-art">
+        <div class="section-heading">
+          <p class="eyebrow">01 / SHARED PIXEL CANVAS</p>
+          <h2>Shared pixel canvas<span class="accent">.</span></h2>
+          <p class="section-intro">
+            Leave a little pixel art for the next visitor. Draw locally, then save
+            your 16 × 16 canvas to the shared board.
+          </p>
+        </div>
+
+        <div class="pixel-editor terminal-window">
+          <div class="terminal-titlebar">
+            <div class="window-dots" aria-hidden="true"><i></i><i></i><i></i></div>
+            <span>shared-canvas.exe</span>
+            <span class="titlebar-end">16 × 16</span>
+          </div>
+
+          <div class="pixel-editor-layout">
+            <div class="pixel-canvas-wrap">
+              <canvas id="pixel-canvas" width="256" height="256"
+                aria-label="16 by 16 shared pixel canvas" role="img"></canvas>
+              <p class="small-note">Click or drag to draw.</p>
+            </div>
+
+            <div class="pixel-tools">
+              <p class="pixel-tool-label">Choose a color</p>
+              <div id="pixel-palette" class="pixel-palette" aria-label="Drawing colors">
+                <button type="button" class="palette-swatch is-selected"
+                  data-color="0" style="--swatch:#ffffff"
+                  aria-label="White" aria-pressed="true"></button>
+                <button type="button" class="palette-swatch"
+                  data-color="1" style="--swatch:#111718"
+                  aria-label="Black" aria-pressed="false"></button>
+                <button type="button" class="palette-swatch"
+                  data-color="2" style="--swatch:#ff4b4b"
+                  aria-label="Red" aria-pressed="false"></button>
+                <button type="button" class="palette-swatch"
+                  data-color="3" style="--swatch:#367bf5"
+                  aria-label="Blue" aria-pressed="false"></button>
+              </div>
+
+              <div class="pixel-actions">
+                <button type="button" class="button button-secondary"
+                  id="pixel-clear">Clear</button>
+                <button type="button" class="button button-primary"
+                  id="pixel-save">Save to shared canvas</button>
+              </div>
+
+              <p id="pixel-status" class="small-note" role="status"
+                aria-live="polite">Local draft — not saved yet.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="pixel-explanation">
+          <p class="eyebrow">WHAT HAPPENS BEHIND THE SCENES</p>
+          <div class="pixel-flow">
+            <article class="pixel-flow-card">
+              <h3>API Gateway</h3>
+              <p>Receives the request to load or save the canvas.</p>
+            </article>
+            <span class="pixel-flow-arrow" aria-hidden="true">→</span>
+            <article class="pixel-flow-card">
+              <h3>Lambda</h3>
+              <p>Validates the 256 pixels and handles the request.</p>
+            </article>
+            <span class="pixel-flow-arrow" aria-hidden="true">→</span>
+            <article class="pixel-flow-card">
+              <h3>DynamoDB</h3>
+              <p>Stores one shared canvas for future visitors.</p>
+            </article>
+          </div>
+          <p class="small-note">
+            One read when loading and one write when saving. Drawing pixels
+            does not send API requests.
+          </p>
+        </div>
+      </section>
+
+      <div class="aws-feature-heading">
+        <p class="eyebrow">02 / VISITOR COUNTER</p>
+        <h2>A live count from the cloud<span class="accent">.</span></h2>
+        <p class="section-intro">
+          Each visit makes a request to the AWS backend, which updates and returns
+          the stored visitor count.
         </p>
       </div>
 

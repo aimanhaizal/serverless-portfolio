@@ -286,3 +286,243 @@ function setupAwsStatusToggle() {
 }
 
 setupAwsStatusToggle();
+
+
+
+
+async function setupPixelEditor() {
+  const canvas = document.querySelector("#pixel-canvas");
+  if (!canvas) return;
+
+  const ctx = canvas.getContext("2d");
+  const palette = document.querySelector("#pixel-palette");
+  const clearButton = document.querySelector("#pixel-clear");
+  const saveButton = document.querySelector("#pixel-save");
+  const status = document.querySelector("#pixel-status");
+
+  if (!ctx || !palette || !clearButton || !saveButton || !status) return;
+
+  const apiUrl = "https://vwrhwdy26e.execute-api.ap-southeast-1.amazonaws.com";
+  const endpoint = `${apiUrl}/canvas`;
+  const size = 16;
+  const cell = canvas.width / size;
+  const colors = ["#ffffff", "#111718", "#ff4b4b", "#367bf5"];
+
+  let pixels = Array(size * size).fill(0);
+  let selectedColor = 2;
+  let drawing = false;
+  let lastCell = -1;
+  let saving = false;
+  let dirty = false;
+
+  function render() {
+    pixels.forEach((colorIndex, index) => {
+      ctx.fillStyle = colors[colorIndex];
+      ctx.fillRect(
+        (index % size) * cell,
+        Math.floor(index / size) * cell,
+        cell,
+        cell
+      );
+    });
+
+    ctx.strokeStyle = "rgba(11, 15, 16, 0.16)";
+    ctx.lineWidth = 1;
+
+    for (let i = 0; i <= size; i++) {
+      ctx.beginPath();
+      ctx.moveTo(i * cell, 0);
+      ctx.lineTo(i * cell, canvas.height);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(0, i * cell);
+      ctx.lineTo(canvas.width, i * cell);
+      ctx.stroke();
+    }
+  }
+
+  function setStatus(message) {
+    status.textContent = message;
+  }
+
+  function setDirty(message = "Unsaved local draft.") {
+    dirty = true;
+    setStatus(message);
+  }
+
+  function paint(event) {
+    const rect = canvas.getBoundingClientRect();
+    const x = Math.floor(((event.clientX - rect.left) / rect.width) * size);
+    const y = Math.floor(((event.clientY - rect.top) / rect.height) * size);
+
+    if (x < 0 || x >= size || y < 0 || y >= size) return;
+
+    const index = y * size + x;
+    if (index === lastCell) return;
+
+    lastCell = index;
+
+    if (pixels[index] === selectedColor) return;
+
+    pixels[index] = selectedColor;
+    render();
+    setDirty();
+  }
+
+  async function loadCanvas() {
+    setStatus("Loading shared canvas from AWS...");
+
+    try {
+      const response = await fetch(endpoint, {
+        cache: "no-store",
+        signal: AbortSignal.timeout(8000),
+      });
+
+      if (!response.ok) {
+        throw new Error(`API returned HTTP ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (
+        !Array.isArray(data.pixels) ||
+        data.pixels.length !== size * size ||
+        !data.pixels.every(
+          (pixel) => Number.isInteger(pixel) && pixel >= 0 && pixel < colors.length
+        )
+      ) {
+        throw new Error("The API returned invalid canvas data.");
+      }
+
+      pixels = data.pixels.slice();
+      dirty = false;
+      render();
+
+      const savedAt = data.updatedAt
+        ? new Date(data.updatedAt).toLocaleString()
+        : null;
+
+      setStatus(
+        savedAt
+          ? `Shared canvas loaded. Last saved: ${savedAt}.`
+          : "Shared canvas loaded. No saved artwork yet."
+      );
+    } catch (error) {
+      console.error("Unable to load shared canvas:", error);
+      setStatus("Couldn't load the shared canvas. You can still draw, then try Save.");
+    }
+  }
+
+  canvas.addEventListener("pointerdown", (event) => {
+    if (saving || (event.button !== 0 && event.pointerType === "mouse")) return;
+
+    event.preventDefault();
+    drawing = true;
+    lastCell = -1;
+    canvas.setPointerCapture(event.pointerId);
+    paint(event);
+  });
+
+  canvas.addEventListener("pointermove", (event) => {
+    if (drawing && !saving) paint(event);
+  });
+
+  function stopDrawing() {
+    drawing = false;
+    lastCell = -1;
+  }
+
+  canvas.addEventListener("pointerup", stopDrawing);
+  canvas.addEventListener("pointercancel", stopDrawing);
+  canvas.addEventListener("lostpointercapture", stopDrawing);
+
+  palette.addEventListener("click", (event) => {
+    const button = event.target.closest(".palette-swatch");
+    if (!button || saving) return;
+
+    const color = Number(button.dataset.color);
+    if (!Number.isInteger(color) || color < 0 || color >= colors.length) return;
+
+    selectedColor = color;
+
+    palette.querySelectorAll(".palette-swatch").forEach((swatch) => {
+      const selected = swatch === button;
+      swatch.classList.toggle("is-selected", selected);
+      swatch.setAttribute("aria-pressed", String(selected));
+    });
+  });
+
+  clearButton.addEventListener("click", () => {
+    if (saving) return;
+
+    pixels = Array(size * size).fill(0);
+    render();
+    setDirty("Cleared locally. Save to clear the shared canvas.");
+  });
+
+  saveButton.addEventListener("click", async () => {
+    if (saving) return;
+
+    saving = true;
+    saveButton.disabled = true;
+    clearButton.disabled = true;
+    setStatus("Saving shared canvas to AWS...");
+
+    try {
+      const response = await fetch(endpoint, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pixels: pixels.slice() }),
+        signal: AbortSignal.timeout(10000),
+      });
+
+      if (!response.ok) {
+        throw new Error(`API returned HTTP ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (
+        !Array.isArray(data.pixels) ||
+        data.pixels.length !== size * size ||
+        !data.pixels.every(
+          (pixel) => Number.isInteger(pixel) && pixel >= 0 && pixel < colors.length
+        )
+      ) {
+        throw new Error("The API returned an invalid save response.");
+      }
+
+      pixels = data.pixels.slice();
+      dirty = false;
+      render();
+
+      const savedAt = data.updatedAt
+        ? new Date(data.updatedAt).toLocaleString()
+        : "just now";
+
+      setStatus(`Saved to the shared canvas at ${savedAt}.`);
+    } catch (error) {
+      console.error("Unable to save shared canvas:", error);
+      setStatus(
+        "Couldn't save to AWS. Your draft is still on this page; please try again."
+      );
+    } finally {
+      saving = false;
+      saveButton.disabled = false;
+      clearButton.disabled = false;
+    }
+  });
+
+  window.addEventListener("beforeunload", (event) => {
+    if (!dirty) return;
+    event.preventDefault();
+    event.returnValue = "";
+  });
+
+  render();
+  await loadCanvas();
+}
+
+setupPixelEditor();
+

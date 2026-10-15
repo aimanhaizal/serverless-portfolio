@@ -20,7 +20,7 @@ def test_stack_defines_http_api_lambda_and_visitor_table():
     template.resource_count_is("AWS::Lambda::Function", 1)
     template.resource_count_is("AWS::ApiGatewayV2::Api", 1)
     template.resource_count_is("AWS::ApiGatewayV2::Integration", 1)
-    template.resource_count_is("AWS::ApiGatewayV2::Route", 3)
+    template.resource_count_is("AWS::ApiGatewayV2::Route", 5)
     template.resource_count_is("AWS::Lambda::Url", 0)
     template.resource_count_is("AWS::DynamoDB::Table", 1)
 
@@ -44,7 +44,7 @@ def test_stack_defines_http_api_lambda_and_visitor_table():
                     "https://aimanhaizal.github.io",
                     "http://localhost:8000",
                 ],
-                "AllowMethods": ["GET"],
+                "AllowMethods": ["GET", "PUT"],
                 "AllowHeaders": ["content-type"],
                 "MaxAge": 600,
             },
@@ -78,6 +78,16 @@ def test_stack_defines_http_api_lambda_and_visitor_table():
         {
             "RouteKey": "GET /visitors/current",
         },
+    )
+
+    template.has_resource_properties(
+        "AWS::ApiGatewayV2::Route",
+        {"RouteKey": "GET /canvas"},
+    )
+
+    template.has_resource_properties(
+        "AWS::ApiGatewayV2::Route",
+        {"RouteKey": "PUT /canvas"},
     )
 
     template.has_resource_properties(

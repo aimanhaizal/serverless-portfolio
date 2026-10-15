@@ -451,3 +451,136 @@ h3 { line-height: 1.35; }
     width: 100%;
   }
 }
+
+
+
+/* Shared pixel canvas */
+.pixel-editor { overflow: hidden; }
+
+.pixel-editor-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(200px, .8fr);
+  gap: 2rem;
+  padding: 1.5rem;
+}
+
+.pixel-canvas-wrap { min-width: 0; }
+
+#pixel-canvas {
+  display: block;
+  width: 100%;
+  max-width: 440px;
+  aspect-ratio: 1;
+  height: auto;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 1px solid var(--border);
+  image-rendering: pixelated;
+  touch-action: none;
+  cursor: crosshair;
+}
+
+.pixel-canvas-wrap .small-note { margin-top: .75rem; }
+
+.pixel-tool-label {
+  margin: 0 0 .75rem;
+  color: var(--muted);
+  font: .78rem var(--mono);
+}
+
+.pixel-palette {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .7rem;
+}
+
+.palette-swatch {
+  width: 38px;
+  height: 38px;
+  border: 2px solid var(--border);
+  border-radius: 5px;
+  background: var(--swatch);
+  cursor: pointer;
+}
+
+.palette-swatch.is-selected {
+  outline: 2px solid var(--green);
+  outline-offset: 3px;
+}
+
+.pixel-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .6rem;
+  margin-top: 1.5rem;
+}
+
+.pixel-actions .button {
+  justify-content: center;
+  cursor: pointer;
+  font-size: .75rem;
+}
+
+#pixel-status { margin-top: 1rem; }
+
+.pixel-explanation {
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--panel);
+}
+
+.pixel-flow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 1rem;
+}
+
+.pixel-flow-card {
+  height: 100%;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--panel-raised);
+}
+
+.pixel-flow-card h3 { margin: 0 0 .5rem; font-size: .95rem; }
+.pixel-flow-card p { margin: 0; color: var(--muted); font-size: .85rem; }
+.pixel-flow-arrow { color: var(--green); }
+
+@media (max-width: 680px) {
+  .pixel-editor-layout { grid-template-columns: 1fr; padding: 1rem; gap: 1.5rem; }
+  #pixel-canvas { max-width: 100%; }
+  .pixel-explanation { padding: 1rem; }
+  .pixel-flow { grid-template-columns: 1fr; }
+  .pixel-flow-arrow { text-align: center; transform: rotate(90deg); }
+}
+
+/* AWS showcase feature headings */
+.aws-feature-heading {
+  margin: 3rem 0 1.5rem;
+}
+
+.aws-feature-heading .eyebrow {
+  margin-bottom: 0.75rem;
+}
+
+.aws-feature-heading h2 {
+  margin: 0 0 0.75rem;
+}
+
+.aws-feature-heading .section-intro {
+  max-width: 620px;
+  margin: 0;
+}
+
+/* Align the pixel canvas with the parent AWS showcase */
+#visitor-stats #pixel-art {
+  max-width: none;
+  margin-left: 0;
+  margin-right: 0;
+  padding-left: 0;
+  padding-right: 0;
+}
