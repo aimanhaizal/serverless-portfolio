@@ -29,7 +29,7 @@ jobs:
       - name: Fetch current visitor count
         id: snapshot
         env:
-          API_URL: https://vwrhwdy26e.execute-api.ap-southeast-1.amazonaws.com/visitors/current
+          API_URL: ${{ vars.API_BASE_URL }}/visitors/current
         run: |
           set -euo pipefail
 

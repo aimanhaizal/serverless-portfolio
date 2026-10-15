@@ -184,7 +184,7 @@ async function loadVisitorCount() {
   if (!counter) return;
 
   const apiUrl =
-    "https://vwrhwdy26e.execute-api.ap-southeast-1.amazonaws.com";
+    window.PORTFOLIO_CONFIG.apiBaseUrl;
 
   updateAwsStatus("checking", "Checking the live AWS API.");
 
@@ -302,7 +302,7 @@ async function setupPixelEditor() {
 
   if (!ctx || !palette || !clearButton || !saveButton || !status) return;
 
-  const apiUrl = "https://vwrhwdy26e.execute-api.ap-southeast-1.amazonaws.com";
+  const apiUrl = window.PORTFOLIO_CONFIG.apiBaseUrl;
   const endpoint = `${apiUrl}/canvas`;
   const size = 16;
   const cell = canvas.width / size;
