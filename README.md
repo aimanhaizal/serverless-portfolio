@@ -192,4 +192,6 @@ AWS deployments can incur charges. Review the resources and estimated costs befo
 
 ## License
 
-No license has been specified yet. Unless a license is added to this repository, others should not assume they have permission to reuse, modify, or redistribute its code.
+This repository's code is released under the **MIT License**. See [`LICENSE`](LICENSE) for the full license text.
+
+This license applies to the project's code. AWS services, third-party dependencies, and other external resources remain subject to their respective terms and licenses.
