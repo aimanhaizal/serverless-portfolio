@@ -137,6 +137,39 @@ async function loadRepositories() {
 loadRepositories();
 
 
+function updateAwsStatus(state, message) {
+  const buttonLabel = document.querySelector("#aws-status-button-label");
+  const title = document.querySelector("#aws-status-title");
+  const note = document.querySelector("#aws-status-note");
+  const counterLabel = document.querySelector(".aws-counter-label");
+
+  const states = {
+    checking: {
+      label: "Checking AWS...",
+      title: "Checking AWS connection",
+      counter: "CHECKING BACKEND",
+    },
+    connected: {
+      label: "AWS connected",
+      title: "AWS API is responding",
+      counter: "LIVE BACKEND RESPONSE",
+    },
+    unavailable: {
+      label: "AWS unavailable",
+      title: "AWS API is unavailable",
+      counter: "BACKEND UNAVAILABLE",
+    },
+  };
+
+  const current = states[state];
+  if (!current) return;
+
+  if (buttonLabel) buttonLabel.textContent = current.label;
+  if (title) title.textContent = current.title;
+  if (note) note.textContent = message;
+  if (counterLabel) counterLabel.lastChild.textContent = ` ${current.counter}`;
+}
+
 async function loadVisitorCount() {
   const counter = document.querySelector("#visitor-count");
   if (!counter) return;
@@ -144,9 +177,12 @@ async function loadVisitorCount() {
   const apiUrl =
     "https://vwrhwdy26e.execute-api.ap-southeast-1.amazonaws.com";
 
+  updateAwsStatus("checking", "Waiting for a response from the AWS API.");
+
   try {
     const response = await fetch(`${apiUrl}/visitors`, {
       cache: "no-store",
+      signal: AbortSignal.timeout(5000),
     });
 
     if (!response.ok) {
@@ -155,14 +191,27 @@ async function loadVisitorCount() {
 
     const data = await response.json();
 
-    if (typeof data.visitors !== "number") {
+    if (typeof data.visitors !== "number" ||
+        !Number.isFinite(data.visitors) ||
+        data.visitors < 0) {
       throw new Error("Unexpected visitor count response");
     }
 
     counter.textContent = data.visitors.toLocaleString();
+
+    updateAwsStatus(
+      "connected",
+      "The AWS API responded successfully and returned a valid visitor count. The counter is live."
+    );
   } catch (error) {
     console.error("Unable to load visitor count:", error);
-    counter.textContent = "Currently unavailable";
+
+    counter.textContent = "Unavailable";
+
+    updateAwsStatus(
+      "unavailable",
+      "The API request failed or did not return valid data. No saved-count fallback is configured yet."
+    );
   }
 }
 
